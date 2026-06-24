@@ -242,6 +242,7 @@ app.put('/api/grants/:id/wordlimits/:fieldId', async (req, res) => {
 });
 // ─── AI: generate one field (streaming) ──────────────────────────────────────
 app.post('/api/grants/:id/questions/:questionId/generate', async (req, res) => {
+  console.log('Question generation started');
   const grants = await db.getData('/grants');
   const grant = grants.find(g => g.id === req.params.id);
 
@@ -292,7 +293,7 @@ Write a strong first draft answer for this grant question.
     const client = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY
     });
-
+console.log('Question generation model:', process.env.OPENAI_MODEL);
     const completion = await client.chat.completions.create({
       model: process.env.OPENAI_MODEL || 'gpt-4o',
       messages: [
