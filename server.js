@@ -241,6 +241,87 @@ app.put('/api/grants/:id/wordlimits/:fieldId', async (req, res) => {
   res.json({ ok: true });
 });
 // ─── AI: generate one field (streaming) ──────────────────────────────────────
+app.post('/api/grants/:id/questions/:questionId/generate', async (req, res) => {
+  const grants = await db.getData('/grants');
+  const grant = grants.find(g => g.id === req.params.id);
+
+  if (!grant) {
+    return res.status(404).json({ error: 'Grant not found' });
+  }
+
+  const question = (grant.questions || []).find(
+    q => q.id === req.params.questionId
+  );
+
+  if (!question) {
+    return res.status(404).json({ error: 'Question not found' });
+  }
+
+  const fields = await db.getData('/fields');
+  const fixedFields = fields.filter(f => f.type === 'fixed');
+
+  const fixedContext = fixedFields
+    .map(f => `${f.name}:\n${f.content}`)
+    .join('\n\n');
+
+  const prompt = `
+You are an expert grant writer.
+
+Use ONLY the company information provided below.
+
+Do not invent facts, numbers, metrics, customers, funding, patents, partnerships, or achievements.
+
+COMPANY KNOWLEDGE
+----------------
+${fixedContext}
+
+GRANT DESCRIPTION
+----------------
+${grant.description}
+
+QUESTION
+----------------
+${question.question}
+
+${question.wordLimit ? `WORD LIMIT: ${question.wordLimit}` : ''}
+
+Write a strong first draft answer for this grant question.
+`;
+
+  try {
+    const client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    });
+
+    const completion = await client.chat.completions.create({
+      model: process.env.OPENAI_MODEL || 'gpt-4o',
+      messages: [
+        {
+          role: 'user',
+          content: prompt
+        }
+      ]
+    });
+
+    const answer =
+      completion.choices[0]?.message?.content?.trim() || '';
+
+    question.answer = answer;
+
+    await db.push('/grants', grants);
+
+    res.json({
+      answer
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error: err.message
+    });
+  }
+});
+
 app.post('/api/grants/:id/generate/:fieldId', async (req, res) => {
   const grants = await db.getData('/grants');
   const grant = grants.find(g => g.id === req.params.id);
