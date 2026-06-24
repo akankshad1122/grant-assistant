@@ -174,13 +174,14 @@ app.post('/api/grants/:id/questions', async (req, res) => {
     grant.questions = [];
   }
 
-  const question = {
-    id: randomUUID(),
-    question: req.body.question || '',
-    answer: '',
-    wordLimit: req.body.wordLimit || null,
-    createdAt: Date.now()
-  };
+ const question = {
+  id: randomUUID(),
+  question: req.body.question || '',
+  answer: '',
+  feedback: '',
+  wordLimit: req.body.wordLimit || null,
+  createdAt: Date.now()
+};
 
   grant.questions.push(question);
 
