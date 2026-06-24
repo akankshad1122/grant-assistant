@@ -309,8 +309,20 @@ ${question.question}
 
 ${question.wordLimit ? `WORD LIMIT: ${question.wordLimit}` : ''}
 
-Write a strong first draft answer for this grant question.
-`;
+PREVIOUS ANSWER
+----------------
+${question.answer || 'None'}
+
+USER FEEDBACK
+----------------
+${question.feedback || 'None'}
+
+If a previous answer exists, improve it using the user feedback.
+
+If feedback exists, prioritize addressing that feedback.
+
+Write a strong grant application response.
+`
 
   try {
     const client = new OpenAI({
