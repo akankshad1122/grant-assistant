@@ -252,6 +252,31 @@ app.put('/api/grants/:id/overrides/:fieldId', async (req, res) => {
   res.json({ ok: true });
 });
 
+app.put('/api/grants/:id/feedback/:fieldId', async (req, res) => {
+  const grants = await db.getData('/grants');
+
+  const grant = grants.find(
+    g => g.id === req.params.id
+  );
+
+  if (!grant) {
+    return res.status(404).json({
+      error: 'Not found'
+    });
+  }
+
+  if (!grant.fieldFeedback) {
+    grant.fieldFeedback = {};
+  }
+
+  grant.fieldFeedback[req.params.fieldId] =
+    req.body.feedback || '';
+
+  await db.push('/grants', grants);
+
+  res.json({ ok: true });
+});
+
 app.put('/api/grants/:id/wordlimits/:fieldId', async (req, res) => {
   const grants = await db.getData('/grants');
   const grant = grants.find(g => g.id === req.params.id);
