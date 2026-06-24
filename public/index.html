@@ -491,6 +491,33 @@ useEffect(() => { setLocalGrant(grant); setOverrides(grant.fieldOverrides || {})
     Word limit: {q.wordLimit || 'Not set'}
   </div>
 
+ <div style={{ marginBottom: 12 }}>
+  <button
+    style={S.btnDanger}
+    onClick={async () => {
+      if (!confirm('Delete this question?')) {
+        return;
+      }
+
+      await apiFetch(
+        `/api/grants/${grant.id}/questions/${q.id}`,
+        {
+          method: 'DELETE'
+        }
+      );
+
+      setLocalGrant(g => ({
+        ...g,
+        questions: (g.questions || []).filter(
+          question => question.id !== q.id
+        )
+      }));
+    }}
+  >
+    Delete Question
+  </button>
+</div>
+
 <div style={{ marginBottom: 12 }}>
   <button
     style={S.btnPrimary}
