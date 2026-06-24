@@ -121,7 +121,18 @@ app.get('/api/grants', async (req, res) => {
 app.post('/api/grants', async (req, res) => {
   const { name, description, status, dueDate, notes } = req.body;
   if (!name) return res.status(400).json({ error: 'name required' });
-  const grant = { id: randomUUID(), name, description: description || '', status: status || 'draft', dueDate: dueDate || '', notes: notes || '', fieldOverrides: {}, wordLimits: {}, createdAt: Date.now() };
+ const grant = {
+  id: randomUUID(),
+  name,
+  description: description || '',
+  status: status || 'draft',
+  dueDate: dueDate || '',
+  notes: notes || '',
+  fieldOverrides: {},
+  wordLimits: {},
+  questions: [],
+  createdAt: Date.now()
+};
   const grants = await db.getData('/grants');
   grants.push(grant);
   await db.push('/grants', grants);
