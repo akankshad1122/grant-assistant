@@ -491,6 +491,37 @@ useEffect(() => { setLocalGrant(grant); setOverrides(grant.fieldOverrides || {})
     Word limit: {q.wordLimit || 'Not set'}
   </div>
 
+<div style={{ marginBottom: 12 }}>
+  <button
+    style={S.btnPrimary}
+    onClick={async () => {
+      const result = await apiFetch(
+        `/api/grants/${grant.id}/questions/${q.id}/generate`,
+        {
+          method: 'POST'
+        }
+      );
+
+      const updatedQuestions =
+        (localGrant.questions || []).map(question =>
+          question.id === q.id
+            ? {
+                ...question,
+                answer: result.answer
+              }
+            : question
+        );
+
+      setLocalGrant(g => ({
+        ...g,
+        questions: updatedQuestions
+      }));
+    }}
+  >
+    Generate Answer
+  </button>
+</div>
+          
  <textarea
   style={{
     ...S.textarea,
