@@ -189,6 +189,36 @@ app.post('/api/grants/:id/questions', async (req, res) => {
   res.json(question);
 });
 
+app.put('/api/grants/:id/questions/:questionId', async (req, res) => {
+  const grants = await db.getData('/grants');
+
+  const grant = grants.find(
+    g => g.id === req.params.id
+  );
+
+  if (!grant) {
+    return res.status(404).json({
+      error: 'Grant not found'
+    });
+  }
+
+  const question = (grant.questions || []).find(
+    q => q.id === req.params.questionId
+  );
+
+  if (!question) {
+    return res.status(404).json({
+      error: 'Question not found'
+    });
+  }
+
+  Object.assign(question, req.body);
+
+  await db.push('/grants', grants);
+
+  res.json(question);
+});
+
 app.put('/api/grants/:id/overrides/:fieldId', async (req, res) => {
   const grants = await db.getData('/grants');
   const grant = grants.find(g => g.id === req.params.id);
