@@ -483,14 +483,24 @@ useEffect(() => { setLocalGrant(grant); setOverrides(grant.fieldOverrides || {})
     <div style={{ marginTop: 20 }}>
       {(localGrant.questions || []).map(q => (
         <div key={q.id} style={S.card(false)}>
-          <div style={{ fontWeight: 600, marginBottom: 8 }}>
-            {q.question}
-          </div>
+  <div style={{ fontWeight: 600, marginBottom: 8 }}>
+    {q.question}
+  </div>
 
-          <div style={{ fontSize: 12, color: 'var(--text3)' }}>
-            Word limit: {q.wordLimit || 'Not set'}
-          </div>
-        </div>
+  <div style={{ fontSize: 12, color: 'var(--text3)', marginBottom: 10 }}>
+    Word limit: {q.wordLimit || 'Not set'}
+  </div>
+
+  <textarea
+    style={{
+      ...S.textarea,
+      minHeight: 120
+    }}
+    value={q.answer || ''}
+    placeholder="Draft answer goes here..."
+    readOnly
+  />
+</div>
       ))}
     </div>
   </div>
