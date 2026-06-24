@@ -675,7 +675,13 @@ return (
     {isGen
       ? <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.65, minHeight: 60, opacity: 0.7 }}>{streamText || 'Drafting…'}<span style={{ animation: 'blink 1s step-end infinite', display: 'inline-block', width: 2, height: 14, background: 'var(--purple)', marginLeft: 2, verticalAlign: 'middle' }} /></div>
       : <>
-    <div style={{ marginBottom: 8 }}>
+      <textarea
+      style={{ ...S.textarea, minHeight: 90, background: 'var(--bg2)' }}
+      value={content}
+      onChange={e => saveOverride(field.id, e.target.value)}
+    />
+
+         <div style={{ marginBottom: 8 }}>
       <div
         style={{
           fontSize: 11,
@@ -718,12 +724,6 @@ return (
         }}
       />
     </div>
-
-    <textarea
-      style={{ ...S.textarea, minHeight: 90, background: 'var(--bg2)' }}
-      value={content}
-      onChange={e => saveOverride(field.id, e.target.value)}
-    />
           <div style={{ fontSize: 11, color: overLimit ? 'var(--red)' : 'var(--text3)', marginTop: 4, textAlign: 'right' }}>
             {wordCount} word{wordCount !== 1 ? 's' : ''}{limit ? ` / ${limit}` : ''}{overLimit ? ' — over limit' : ''}
           </div>
