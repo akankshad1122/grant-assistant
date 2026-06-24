@@ -627,6 +627,53 @@ useEffect(() => { setLocalGrant(grant); setOverrides(grant.fieldOverrides || {})
     }}
   />
 </div>
+
+<div style={{ marginTop: 10 }}>
+  <div
+    style={{
+      fontSize: 12,
+      color: 'var(--text3)',
+      marginBottom: 4
+    }}
+  >
+    Feedback for regeneration
+  </div>
+
+  <textarea
+    style={{
+      ...S.textarea,
+      minHeight: 80
+    }}
+    value={q.feedback || ''}
+    placeholder="e.g. Make this less technical, more concise, and focused on commercial impact."
+    onChange={async e => {
+      const feedback = e.target.value;
+
+      const updatedQuestions =
+        (localGrant.questions || []).map(question =>
+          question.id === q.id
+            ? {
+                ...question,
+                feedback
+              }
+            : question
+        );
+
+      setLocalGrant(g => ({
+        ...g,
+        questions: updatedQuestions
+      }));
+
+      await apiFetch(
+        `/api/grants/${grant.id}/questions/${q.id}`,
+        {
+          method: 'PUT',
+          body: { feedback }
+        }
+      );
+    }}
+  />
+</div>
           
 </div>
       ))}
