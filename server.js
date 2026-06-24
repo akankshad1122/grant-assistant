@@ -157,6 +157,38 @@ app.delete('/api/grants/:id', async (req, res) => {
   res.json({ ok: true });
 });
 
+app.post('/api/grants/:id/questions', async (req, res) => {
+  const grants = await db.getData('/grants');
+
+  const grant = grants.find(
+    g => g.id === req.params.id
+  );
+
+  if (!grant) {
+    return res.status(404).json({
+      error: 'Grant not found'
+    });
+  }
+
+  if (!grant.questions) {
+    grant.questions = [];
+  }
+
+  const question = {
+    id: randomUUID(),
+    question: req.body.question || '',
+    answer: '',
+    wordLimit: req.body.wordLimit || null,
+    createdAt: Date.now()
+  };
+
+  grant.questions.push(question);
+
+  await db.push('/grants', grants);
+
+  res.json(question);
+});
+
 app.put('/api/grants/:id/overrides/:fieldId', async (req, res) => {
   const grants = await db.getData('/grants');
   const grant = grants.find(g => g.id === req.params.id);
