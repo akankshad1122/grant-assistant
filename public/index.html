@@ -259,6 +259,8 @@ function GrantWorkspace({ grant, fields, onGrantUpdate }) {
   const [savingDesc, setSavingDesc] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
   const [showQuestionModal, setShowQuestionModal] = useState(false);
+  const [newQuestion, setNewQuestion] = useState('');
+const [newQuestionLimit, setNewQuestionLimit] = useState('');
   const descTimer = useRef(null);
   const notesTimer = useRef(null);
 
@@ -272,6 +274,30 @@ useEffect(() => { setLocalGrant(grant); setOverrides(grant.fieldOverrides || {})
     setLocalGrant(updated);
     onGrantUpdate(updated);
   }
+
+  async function createQuestion(question, wordLimit) {
+  const created = await apiFetch(
+    `/api/grants/${grant.id}/questions`,
+    {
+      method: 'POST',
+      body: {
+        question,
+        wordLimit
+      }
+    }
+  );
+
+  const updatedGrant = {
+    ...localGrant,
+    questions: [
+      ...(localGrant.questions || []),
+      created
+    ]
+  };
+
+  setLocalGrant(updatedGrant);
+  onGrantUpdate(updatedGrant);
+}
 
   function onDescChange(val) {
     setLocalGrant(g => ({ ...g, description: val }));
@@ -554,6 +580,59 @@ return (
             onChange={e => onNotesChange(e.target.value)} />
         </div>
       )}
+
+      {showQuestionModal && (
+  <Modal
+    title="Add Grant Question"
+    onClose={() => setShowQuestionModal(false)}
+    footer={[
+      <button
+        key="cancel"
+        style={S.btnSecondary}
+        onClick={() => setShowQuestionModal(false)}
+      >
+        Cancel
+      </button>,
+
+      <button
+        key="save"
+        style={S.btnPrimary}
+        disabled={!newQuestion.trim()}
+        onClick={async () => {
+          await createQuestion(
+            newQuestion,
+            parseInt(newQuestionLimit) || null
+          );
+
+          setNewQuestion('');
+          setNewQuestionLimit('');
+          setShowQuestionModal(false);
+        }}
+      >
+        Add Question
+      </button>
+    ]}
+  >
+    <FormRow label="Question">
+      <textarea
+        style={S.textarea}
+        value={newQuestion}
+        onChange={e => setNewQuestion(e.target.value)}
+        placeholder="Describe your commercialization strategy..."
+      />
+    </FormRow>
+
+    <FormRow label="Word limit">
+      <input
+        type="number"
+        style={S.input}
+        value={newQuestionLimit}
+        onChange={e => setNewQuestionLimit(e.target.value)}
+        placeholder="Optional"
+      />
+    </FormRow>
+  </Modal>
+)}
 
       <style>{`
         @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
