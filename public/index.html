@@ -258,6 +258,7 @@ function GrantWorkspace({ grant, fields, onGrantUpdate }) {
   const [generating, setGenerating] = useState({});
   const [savingDesc, setSavingDesc] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
+  const [showQuestionModal, setShowQuestionModal] = useState(false);
   const descTimer = useRef(null);
   const notesTimer = useRef(null);
 
