@@ -41,7 +41,15 @@ async function seedIfEmpty() {
 await seedIfEmpty();
 
 // ─── Anti-hallucination prompt builder ───────────────────────────────────────
-function buildPrompt(fieldName, fieldBaseContent, grantName, grantDescription, fixedFields, wordLimit = null) {
+function buildPrompt(
+  fieldName,
+  fieldBaseContent,
+  grantName,
+  grantDescription,
+  fixedFields,
+  wordLimit = null,
+  feedback = ''
+) {
   const fixedContext = fixedFields.map(f => `${f.name}:\n${f.content}`).join('\n\n');
   return `You are a professional grant writer helping a company tailor their grant application to a specific funder.
 
@@ -62,8 +70,14 @@ ${grantDescription}
 FIELD TO REWRITE
 ------------------------------------------------------------
 Field name: ${fieldName}
-Base content written by the team:
+
+CURRENT CONTENT
+------------------------------------------------------------
 ${fieldBaseContent}
+
+USER FEEDBACK
+------------------------------------------------------------
+${feedback || 'None'}
 
 INSTRUCTIONS
 ------------------------------------------------------------
@@ -129,6 +143,7 @@ app.post('/api/grants', async (req, res) => {
   dueDate: dueDate || '',
   notes: notes || '',
   fieldOverrides: {},
+   fieldFeedback: {},
   wordLimits: {},
   questions: [],
   createdAt: Date.now()
@@ -398,7 +413,20 @@ app.post('/api/grants/:id/generate/:fieldId', async (req, res) => {
   try {
     const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     const wordLimit = grant.wordLimits?.[field.id] || null;
-    const prompt = buildPrompt(field.name, field.content, grant.name, grant.description, fields.filter(f => f.type === 'fixed'), wordLimit);
+    const currentContent =
+  grant.fieldOverrides?.[field.id] || field.content;
+
+const feedback =
+  grant.fieldFeedback?.[field.id] || '';
+    const prompt = buildPrompt(
+  field.name,
+  currentContent,
+  grant.name,
+  grant.description,
+  fields.filter(f => f.type === 'fixed'),
+  wordLimit,
+  feedback
+);
     let fullText = '';
 
     const stream = await client.chat.completions.create({
@@ -447,11 +475,27 @@ app.post('/api/grants/:id/generate-all', async (req, res) => {
     try {
       let fullText = '';
       const wordLimit = grant.wordLimits?.[field.id] || null;
+      const currentContent =
+  grant.fieldOverrides?.[field.id] || field.content;
+
+const feedback =
+  grant.fieldFeedback?.[field.id] || '';
       const stream = await client.chat.completions.create({
         model: process.env.OPENAI_MODEL || 'gpt-4o',
         max_tokens: 1024,
         stream: true,
-        messages: [{ role: 'user', content: buildPrompt(field.name, field.content, grant.name, grant.description, fixedFields, wordLimit) }],
+       messages: [{
+  role: 'user',
+  content: buildPrompt(
+    field.name,
+    currentContent,
+    grant.name,
+    grant.description,
+    fixedFields,
+    wordLimit,
+    feedback
+  )
+}],
       });
       for await (const chunk of stream) {
         const text = chunk.choices[0]?.delta?.content || '';
