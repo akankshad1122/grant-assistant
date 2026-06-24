@@ -491,15 +491,37 @@ useEffect(() => { setLocalGrant(grant); setOverrides(grant.fieldOverrides || {})
     Word limit: {q.wordLimit || 'Not set'}
   </div>
 
-  <textarea
-    style={{
-      ...S.textarea,
-      minHeight: 120
-    }}
-    value={q.answer || ''}
-    placeholder="Draft answer goes here..."
-    readOnly
-  />
+ <textarea
+  style={{
+    ...S.textarea,
+    minHeight: 120
+  }}
+  value={q.answer || ''}
+  placeholder="Draft answer goes here..."
+  onChange={async e => {
+    const answer = e.target.value;
+
+    const updatedQuestions = (localGrant.questions || []).map(
+      question =>
+        question.id === q.id
+          ? { ...question, answer }
+          : question
+    );
+
+    setLocalGrant(g => ({
+      ...g,
+      questions: updatedQuestions
+    }));
+
+    await apiFetch(
+      `/api/grants/${grant.id}/questions/${q.id}`,
+      {
+        method: 'PUT',
+        body: { answer }
+      }
+    );
+  }}
+/>
 </div>
       ))}
     </div>
