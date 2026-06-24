@@ -382,7 +382,13 @@ useEffect(() => { setLocalGrant(grant); setOverrides(grant.fieldOverrides || {})
         </div>
         {/* Tabs */}
         <div style={{ display: 'flex' }}>
-          {[['setup', 'Setup'], ['adaptive', `Adaptive (${adaptiveFields.length})`], ['fixed', `Fixed (${fixedFields.length})`], ['notes', 'Notes']].map(([key, label]) => (
+          {[
+  ['setup', 'Setup'],
+  ['questions', `Questions (${localGrant.questions?.length || 0})`],
+  ['adaptive', `Adaptive (${adaptiveFields.length})`],
+  ['fixed', `Fixed (${fixedFields.length})`],
+  ['notes', 'Notes']
+].map(([key, label]) => (
             <div key={key} className="tab-hover" onClick={() => setTab(key)}
               style={{ padding: '9px 16px', fontSize: 13, cursor: 'pointer', color: tab === key ? 'var(--text)' : 'var(--text2)', borderBottom: `2px solid ${tab === key ? 'var(--purple)' : 'transparent'}`, fontWeight: tab === key ? 600 : 400, marginBottom: -0.5 }}>
               {label}
@@ -434,6 +440,36 @@ useEffect(() => { setLocalGrant(grant); setOverrides(grant.fieldOverrides || {})
         </div>
       )}
 
+{tab === 'questions' && (
+  <div style={S.panel}>
+    <div style={S.panelTitle}>Grant Questions</div>
+    <div style={S.panelSub}>
+      Questions that are unique to this grant application.
+    </div>
+
+    <button
+      style={S.btnPrimary}
+      onClick={() => setShowQuestionModal(true)}
+    >
+      + Add Question
+    </button>
+
+    <div style={{ marginTop: 20 }}>
+      {(localGrant.questions || []).map(q => (
+        <div key={q.id} style={S.card(false)}>
+          <div style={{ fontWeight: 600, marginBottom: 8 }}>
+            {q.question}
+          </div>
+
+          <div style={{ fontSize: 12, color: 'var(--text3)' }}>
+            Word limit: {q.wordLimit || 'Not set'}
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+      
       {tab === 'adaptive' && (
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 30px' }}>
           {adaptiveFields.length === 0 && <div style={{ color: 'var(--text3)', fontSize: 13, padding: '40px 0', textAlign: 'center' }}>No adaptive fields in library yet.</div>}
