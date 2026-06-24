@@ -675,6 +675,58 @@ return (
     {isGen
       ? <div style={{ fontSize: 13, color: 'var(--text2)', lineHeight: 1.65, minHeight: 60, opacity: 0.7 }}>{streamText || 'Drafting…'}<span style={{ animation: 'blink 1s step-end infinite', display: 'inline-block', width: 2, height: 14, background: 'var(--purple)', marginLeft: 2, verticalAlign: 'middle' }} /></div>
       : <>
+
+        : <>
+    <div style={{ marginBottom: 8 }}>
+      <div
+        style={{
+          fontSize: 11,
+          color: 'var(--text3)',
+          fontWeight: 600,
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+          marginBottom: 4
+        }}
+      >
+        Feedback for regeneration
+      </div>
+
+      <textarea
+        style={{
+          ...S.textarea,
+          minHeight: 70,
+          background: 'var(--bg2)'
+        }}
+        value={(localGrant.fieldFeedback || {})[field.id] || ''}
+        placeholder="e.g. Make this less technical and focus on patient outcomes."
+        onChange={async e => {
+          const feedback = e.target.value;
+
+          setLocalGrant(g => ({
+            ...g,
+            fieldFeedback: {
+              ...(g.fieldFeedback || {}),
+              [field.id]: feedback
+            }
+          }));
+
+          await apiFetch(
+            `/api/grants/${grant.id}/feedback/${field.id}`,
+            {
+              method: 'PUT',
+              body: { feedback }
+            }
+          );
+        }}
+      />
+    </div>
+
+    <textarea
+      style={{ ...S.textarea, minHeight: 90, background: 'var(--bg2)' }}
+      value={content}
+      onChange={e => saveOverride(field.id, e.target.value)}
+    />
+        
           <textarea style={{ ...S.textarea, minHeight: 90, background: 'var(--bg2)' }}
             value={content}
             onChange={e => saveOverride(field.id, e.target.value)} />
